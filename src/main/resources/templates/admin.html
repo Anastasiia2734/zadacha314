@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Администратор</title>
+</head>
+<body>
+<h1>Добро пожаловать на страницу администратора</h1>
+<br>
+<a th:href="@{/logout}">Выход</a>
+
+<h1>Список пользователей</h1>
+
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 3px solid pink;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+<form action="/admin/find" method="post">
+    <input type="number" name="id" placeholder="Введите ID" required/>
+    <button type="submit"
+            style="display: inline-block; margin-top: 3px; padding: 3px; background-color: #FFC0CBFF; color: #000000; text-decoration: none;">
+        Найти пользователя
+    </button>
+</form>
+
+<div th:if="${foundUser != null}">
+    <h2>Found User</h2>
+    <p>ID: <span th:text="${foundUser.id}"></span></p>
+    <p>Username: <span th:text="${foundUser.username}"></span></p>
+    <p>Email: <span th:text="${foundUser.email}"></span></p>
+</div>
+<br>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Роль</th>
+        <th>Имя</th>
+        <th>Фамилия</th>
+        <th>E-mail</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.firstName}"></td>
+        <td th:text="${user.lastName}"></td>
+        <td th:text="${user.email}"></td>
+        <td>
+            <a th:href="@{/admin/edit(id=${user.id})}" style="margin-right: 10px;">Изменить</a>
+            <form th:action="@{/admin/delete}" method="post" style="display:inline;">
+                <input type="hidden" name="id" th:value="${user.id}"/>
+                <button type="submit"
+                        style="background-color: #ea5b5b; color: #000000; border: none; padding: 5px 10px; cursor: pointer;">
+                    Удалить
+                </button>
+            </form>
+
+        </td>
+    </tr>
+    </tbody>
+</table>
+<form action="/admin/add" method="post" th:object="${user}">
+    <a th:href="@{/admin/new}"
+       style="display: inline-block; margin-top: 10px; padding: 10px; background-color: #FFC0CBFF; color: #000000; text-decoration: none;">Добавить
+        пользователя</a>
+</form>
+</body>
+</html>

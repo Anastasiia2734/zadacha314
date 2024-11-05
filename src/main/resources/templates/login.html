@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:color="http://www.w3.org/1999/xhtml">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход в систему</title>
+  <style>
+    body {
+      font-family: Segoe Print, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #efc6ef;
+    }
+    .login form {
+      font-family: Segoe Print, sans-serif;
+      background-color: pink;
+      padding: 20px;
+      border: 1px black;
+      border-radius: 5px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input {
+      font-family: Segoe Print, sans-serif;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px blue;
+      border-radius: 5px;
+    }
+    button {
+      font-family: Segoe Print, sans-serif;
+      width: 100%;
+      padding: 8px;
+      background-color: blueviolet;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #efc0ef;
+    }
+  </style>
+
+</head>
+<body>
+<div class="login-form">
+  <h2>Вход</h2>
+  <form action="/login" method="POST">
+    <div>
+      <label for="username">Имя пользователя:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <div>
+      <button type="submit">Вход</button>
+    </div>
+  </form>
+</div>
+
+</body>
+</html>
