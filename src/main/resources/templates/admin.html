@@ -40,16 +40,19 @@
     <p>ID: <span th:text="${foundUser.id}"></span></p>
     <p>Username: <span th:text="${foundUser.username}"></span></p>
     <p>Email: <span th:text="${foundUser.email}"></span></p>
+    <p>Password: <span th:text="${foundUser.password}"></span></p>
 </div>
 <br>
 <table>
     <thead>
     <tr>
         <th>ID</th>
-        <th>Роль</th>
+        <th>Логин</th>
+        <th>Права доступа</th>
         <th>Имя</th>
         <th>Фамилия</th>
         <th>E-mail</th>
+        <th>Пароль</th>
         <th>Действия</th>
     </tr>
     </thead>
@@ -57,9 +60,11 @@
     <tr th:each="user : ${users}">
         <td th:text="${user.id}"></td>
         <td th:text="${user.username}"></td>
+        <td th:text="${user.roles}"></td>
         <td th:text="${user.firstName}"></td>
         <td th:text="${user.lastName}"></td>
         <td th:text="${user.email}"></td>
+        <td th:text="${user.password}"></td>
         <td>
             <a th:href="@{/admin/edit(id=${user.id})}" style="margin-right: 10px;">Изменить</a>
             <form th:action="@{/admin/delete}" method="post" style="display:inline;">

@@ -12,7 +12,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -21,10 +24,24 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "Поле username не может быть пустым")
+    @Size(min = 1, max = 20, message = "username должен содержать от 1 до 20 символов")
     private String username;
+
+    @NotBlank(message = "Поле e-mail не может быть пустым")
+    @Size(min = 1, max = 30, message = "E-mail должен содержать от 1 до 30 символов")
     private String email;
+
+    @NotBlank(message = "Поле password не может быть пустым")
     private String password;
+
+    @NotBlank(message = "Поле имя пользователя не может быть пустым")
+    @Size(min = 2, max = 20, message = "Имя пользователя должно содержать от 2 до 20 смиволов")
     private String firstName;
+
+    @NotBlank(message = "Поле фамилия не может быть пустым")
+    @Size(min = 2, max = 20, message = "Фамилия должна сожержать от 2 до 20 символов")
     private String lastName;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -127,5 +144,20 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, email);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        User user = (User) obj;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(username, user.username) &&
+                Objects.equals(email, user.email);
     }
 }

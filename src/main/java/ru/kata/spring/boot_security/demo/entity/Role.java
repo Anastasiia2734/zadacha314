@@ -8,6 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import java.util.Objects;
 import java.util.Set;
@@ -19,6 +21,8 @@ public class Role implements GrantedAuthority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Поле name не может быть пустым")
+    @Size(min = 1, max = 5, message = "Имя содержит от 1 до 5 символов")
     private String name;
 
 
@@ -35,6 +39,10 @@ public class Role implements GrantedAuthority {
 
     public Role(Long id, String name) {
         this.id = id;
+        this.name = name;
+    }
+
+    public Role(String name) {
         this.name = name;
     }
 
@@ -78,5 +86,10 @@ public class Role implements GrantedAuthority {
         if (obj == null || getClass() != obj.getClass()) return false;
         Role role = (Role) obj;
         return Objects.equals(id, role.id);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

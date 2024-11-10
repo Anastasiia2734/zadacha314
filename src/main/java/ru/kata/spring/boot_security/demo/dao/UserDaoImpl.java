@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.kata.spring.boot_security.demo.entity.User;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
@@ -46,8 +47,8 @@ public class UserDaoImpl implements UserDao {
             return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class).
                     setParameter("username", username).
                     getSingleResult();
-        } catch (NoResultException e) {
-            return null;
+        } catch (EntityNotFoundException e) {
+            throw new UsernameNotFoundException(username);
         } catch (NonUniqueResultException e) {
             List<User> users = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)

@@ -6,13 +6,22 @@
 </head>
 <body>
 <h1>Добавить нового пользователя</h1>
+
 <form th:method="post" th:action="@{/admin/new}" th:object="${user}">
 
+    <input type="text" th:field="*{username}" placeholder="Логин" required minlength="1" maxlength="55"/>
     <input type="text" th:field="*{firstName}" placeholder="Имя" required/>
     <input type="text" th:field="*{lastName}" placeholder="Фамилия" required/>
     <input type="email" th:field="*{email}" placeholder="E-mail" required/>
+    <input type="password" th:field="*{password}" placeholder="Пароль" required/>
 
-    <input type="submit" th:value="'Сохранить'">
+    <label for="roles">Роли</label>
+    <select id="roles" name="roleIds" multiple>
+
+        <option th:value="${role.id}" th:text="${role.name}" th:each="role : ${roles}"></option>
+    </select>
+
+    <input type="submit" value="Сохранить">
 </form>
 </body>
 </html>

@@ -7,57 +7,65 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.kata.spring.boot_security.demo.entity.Role;
 import ru.kata.spring.boot_security.demo.entity.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
+
+import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
     private final UserService userService;
+    private final RoleService roleService;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
+        this.roleService = roleService;
     }
 
     @GetMapping
-    public String listUsers(Model model) {
+    public String listAllUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("user", new User());
         return "admin";
     }
 
-    @PostMapping("/add")
-    public String addUser(@ModelAttribute("user") User user) {
-        userService.createUser(user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword());
-        return "redirect:/admin";
-    }
-
     @GetMapping("/new")
-    public String newUser(Model model) {
+    public String showNewUser(Model model) {
         model.addAttribute("user", new User());
+        model.addAttribute("roles", roleService.findAllRoles());
         return "new";
     }
 
     @PostMapping("/new")
-    public String create(@ModelAttribute("user") User user) {
+    public String createUser(@ModelAttribute("user") User user, @RequestParam List<Long> roleIds) {
+        Set<Role> roles = roleService.findRoleByIds(roleIds);
+        user.setRoles(roles);
         userService.createUser(user.getUsername(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-                user.getPassword());
+                user.getPassword(),
+                roles);
         return "redirect:/admin";
     }
 
 
     @PostMapping("/update")
-    public String updateUser(@ModelAttribute("user") User user) {
-        userService.updateUser(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword());
+    public String updateUser(@ModelAttribute("user") User user, @RequestParam List<Long> roleIds) {
+        Set<Role> roles = roleService.findRoleByIds(roleIds);
+        user.setRoles(roles);
+        userService.updateUser(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword(), user.getRoles());
         return "redirect:/admin";
     }
 
+
     @PostMapping("/delete")
-    public String deleteUser(@RequestParam Long id) {
+    public String deleteUserById(@RequestParam Long id) {
         userService.deleteUser(id);
         return "redirect:/admin";
     }
@@ -65,9 +73,7 @@ public class AdminController {
     @PostMapping("/find")
     public String findUserById(@RequestParam Long id, Model model) {
         User user = userService.getUser(id);
-        model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("foundUser", user);
-        model.addAttribute("user", new User());
         return "admin";
     }
 
@@ -75,7 +81,7 @@ public class AdminController {
     public String editUser(@RequestParam("id") Long id, Model model) {
         User user = userService.getUser(id);
         model.addAttribute("user", user);
+        model.addAttribute("roles", roleService.findAllRoles());
         return "edit";
     }
 }
-

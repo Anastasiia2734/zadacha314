@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>User</title>
+    <style>
+        body {
+            background-color: lavenderblush;
+        }
+       h1 {
+            font-family: Segoe Print, sans-serif;
+            color: black;
+        }
+    </style>
 </head>
 <body>
 <h1>Добро пожаловать на страницу, User</span>!</h1>
-<p>E-mail: <span th:text="${user.email}"></span></p>
-<p>password: <span th:text="${user.password}"></span></p>
+<p>Логин: <span th:text="${user.username}"></span></p>
+<p>Имя: <span th:text="${user.firstName}"></span></p>
+<p>Фамилия: <span th:text="${user.lastName}"></span></p>
+<p>e-mail: <span th:text="${user.email}"></span></p>
+<p>Права доступа: <span th:text="${user.roles}"></span></p>
+<p>Пароль: <span th:text="${user.password}"></span></p>
 
 <a th:href="@{/logout}">Выйти</a>
 </body>
