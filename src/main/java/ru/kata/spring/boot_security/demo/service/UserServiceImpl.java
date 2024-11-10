@@ -76,12 +76,9 @@ public class UserServiceImpl implements UserService {
         user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
-
-        if (name.equals("admin")) {
-            user.setRoles(Set.of(roleDao.findRoleByName("ROLE_ADMIN")));
-        }
         user.setRoles(roles);
         userDao.create(user);
+
     }
 
     @Override
@@ -93,7 +90,6 @@ public class UserServiceImpl implements UserService {
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
-            //user.setPassword(password);
 
             if (password != null && !password.isEmpty()) {
                 user.setPassword(passwordEncoder.encode(password));
@@ -101,5 +97,6 @@ public class UserServiceImpl implements UserService {
             user.setRoles(roles);
             userDao.update(user);
         }
+
     }
 }
