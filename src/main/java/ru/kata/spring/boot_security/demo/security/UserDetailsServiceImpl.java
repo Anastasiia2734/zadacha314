@@ -10,7 +10,7 @@ import ru.kata.spring.boot_security.demo.entity.User;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    UserDao userDao;
+    private final UserDao userDao;
 
     public UserDetailsServiceImpl(UserDao userDao) {
         this.userDao = userDao;

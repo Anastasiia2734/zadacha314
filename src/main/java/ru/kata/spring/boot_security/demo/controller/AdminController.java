@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,18 +30,23 @@ public class AdminController {
     }
 
     @GetMapping
-    public String listAllUsers(Model model) {
+    public String listAllUsers(Model model, @AuthenticationPrincipal UserDetails userDetailsl) {
+        User currentUser = userService.findUserByName(userDetailsl.getUsername());
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("user", new User());
+        model.addAttribute("allRoles", roleService.findAllRoles());
         return "admin";
     }
+
 
     @GetMapping("/new")
     public String showNewUser(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("roles", roleService.findAllRoles());
-        return "new";
+        model.addAttribute("roles", userService.getAllUsers());
+        return "admin";
     }
+
 
     @PostMapping("/new")
     public String createUser(@ModelAttribute("user") User user, @RequestParam List<Long> roleIds) {

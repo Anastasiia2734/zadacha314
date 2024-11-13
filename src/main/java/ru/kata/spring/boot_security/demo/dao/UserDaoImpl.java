@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.dao;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entity.User;
 
 import javax.persistence.EntityManager;
@@ -11,7 +12,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
-
+@Transactional
 @Repository
 public class UserDaoImpl implements UserDao {
 
@@ -44,16 +45,11 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User findUserByName(String username) {
         try {
-            return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class).
-                    setParameter("username", username).
-                    getSingleResult();
-        } catch (EntityNotFoundException e) {
-            throw new UsernameNotFoundException(username);
-        } catch (NonUniqueResultException e) {
-            List<User> users = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+            return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)
-                    .getResultList();
-            return users.isEmpty() ? null : users.get(0);
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         }
     }
 

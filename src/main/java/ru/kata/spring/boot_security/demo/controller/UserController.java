@@ -21,7 +21,7 @@ public class UserController {
     @GetMapping("/user")
     public String userHome(@AuthenticationPrincipal User user, Model model) {
         model.addAttribute("user", user);
-        return "user";
+        return "user_boot";
     }
 }
 
