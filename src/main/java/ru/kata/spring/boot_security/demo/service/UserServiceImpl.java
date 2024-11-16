@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,14 +40,11 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public User findUserByName(String username) {
-        User user = userDao.findUserByName(username);
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
-        }
-        return user;
+        return userDao.findUserByName(username);
     }
 
     @Override
@@ -62,32 +60,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
-        }
-        if (password == null || password.length() == 0) {
-            throw new IllegalArgumentException("Password cannot be empty");
-        }
-
+    public User createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
         User user = new User();
         user.setUsername(name);
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(password);
+        user.setPassword(hashedPassword);
+
         user.setRoles(roles);
         userDao.create(user);
-
+        return user;
     }
 
     @Override
     @Transactional
-    public void updateUser(Long id, String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
+    public User updateUser(Long id, String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
         User user = getUser(id);
         if (user != null) {
             user.setUsername(name);
-            user.setFirstName(firstName);
+            //user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
 
@@ -98,5 +92,6 @@ public class UserServiceImpl implements UserService {
             userDao.update(user);
         }
 
+        return user;
     }
 }

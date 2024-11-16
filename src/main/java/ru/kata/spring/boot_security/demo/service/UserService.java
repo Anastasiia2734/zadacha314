@@ -15,8 +15,8 @@ public interface UserService {
 
     public void deleteUser(Long id);
 
-    void createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles);
+    User createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles);
 
-    void updateUser(Long id, String name, String firstName, String lastName, String email, String password, Set<Role> roles);
+    User updateUser(Long id, String name, String firstName, String lastName, String email, String password, Set<Role> roles);
 
 }

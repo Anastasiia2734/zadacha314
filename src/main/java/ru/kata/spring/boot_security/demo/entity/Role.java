@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
@@ -22,11 +23,12 @@ public class Role implements GrantedAuthority {
     private Long id;
 
     @NotBlank(message = "Поле name не может быть пустым")
-    @Size(min = 1, max = 5, message = "Имя содержит от 1 до 5 символов")
+    @Size(min = 1, max = 30, message = "Имя содержит от 1 до 30 символов")
     private String name;
 
 
     @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
     private Set<User> users;
 
     public Role() {

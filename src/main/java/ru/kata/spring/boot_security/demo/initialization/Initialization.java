@@ -26,26 +26,35 @@ public class Initialization {
 
     @PostConstruct
     public void initUsers() {
+
         if (roleDao.findRoleByName("ROLE_ADMIN") == null) {
             Role adminRole = new Role();
             adminRole.setName("ROLE_ADMIN");
             roleDao.saveRole(adminRole);
         }
+
         if (roleDao.findRoleByName("ROLE_USER") == null) {
             Role userRole = new Role();
             userRole.setName("ROLE_USER");
             roleDao.saveRole(userRole);
         }
 
-        if (userService.findUserByName("admin") == null) {
-            Role adminRole = roleServiceImpl.findRoleByName("ROLE_ADMIN");
-            Set<Role> roles = new HashSet<>();
-            userService.createUser("admin", "Евгений", "Кузнецов", "kuzya92admin.@mail.ru", "admin", roles);
+
+        /*if (userService.findUserByName("admin") == null) {
+            Set<Role> adminRole = new HashSet<>();
+            Role userRole = roleDao.findRoleByName("ROLE_USER");
+            Role adminRoles = roleDao.findRoleByName("ROLE_ADMIN");
+           adminRole.add(userRole);
+            adminRole.add(adminRoles);
+            userService.createUser("admin", "Евгений", "Кузнецов", "kuzya92admin.@mail.ru", "admin", adminRole);
         }
+
+
         if (userService.findUserByName("user") == null) {
-            Role userRole = roleServiceImpl.findRoleByName("ROLE_USER");
-            Set<Role> roles = new HashSet<>();
-            userService.createUser("user", "Илья", "Набоков", "i.nabokovuser@mail.ru", "user", roles);
-        }
+            Set<Role> userRoles = new HashSet<>();
+            Role userRole = roleDao.findRoleByName("ROLE_USER");
+            userRoles.add(userRole);
+            userService.createUser("user", "Илья", "Набоков", "i.nabokovuser@mail.ru", "user", userRoles);
+        }*/
     }
 }

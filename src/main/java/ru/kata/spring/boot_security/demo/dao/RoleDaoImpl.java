@@ -6,6 +6,7 @@ import ru.kata.spring.boot_security.demo.entity.Role;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.HashSet;
@@ -22,14 +23,15 @@ public class RoleDaoImpl implements RoleDao {
 
 
     @Override
-    public Role findRoleByName(String name) {
+    public Role findRoleByName(String roleName) {
         try {
-            return entityManager.createQuery(
-                            "SELECT r FROM Role r WHERE r.name = :name", Role.class)
-                    .setParameter("name", name)
+            return entityManager.createQuery("SELECT r FROM Role r WHERE r.name = :name", Role.class)
+                    .setParameter("name", roleName)
                     .getSingleResult();
-        } catch (EntityNotFoundException e) {
-            throw new EntityNotFoundException("Role with name " + name + " not found");
+        } catch (NoResultException e) {
+            // Log the error and return null or a default role
+
+            return null;  // Return null if the role is not found
         }
     }
 
