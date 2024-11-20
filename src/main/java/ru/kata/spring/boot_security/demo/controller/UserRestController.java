@@ -16,23 +16,25 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_security.demo.DTO.UserDto;
 import ru.kata.spring.boot_security.demo.entity.Role;
 import ru.kata.spring.boot_security.demo.entity.User;
-import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.RoleServiceImpl;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Set;
 
 
 @RestController
 @RequestMapping("/api/users")
 public class UserRestController {
+
     private final UserService userService;
-    private final RoleService roleService;
+    private final RoleServiceImpl roleServiceImpl;
 
     @Autowired
-    public UserRestController(UserService userService, RoleService roleService) {
+    public UserRestController(UserService userService, RoleServiceImpl roleServiceImpl) {
         this.userService = userService;
-        this.roleService = roleService;
+        this.roleServiceImpl = roleServiceImpl;
     }
 
     @GetMapping
@@ -51,67 +53,35 @@ public class UserRestController {
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody UserDto userDto) {
-        Set<Role> roles = roleService.findRoleByIds(userDto.getRoleIds());
-        if (roles.isEmpty()) {
+        try {
+            User createdUser = userService.createUser(userDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } catch (EntityNotFoundException ex) {
             return ResponseEntity.badRequest().build();
         }
-
-        User user = new User(userDto.getUsername(),
-                userDto.getFirstName(),
-                userDto.getLastName(),
-                userDto.getEmail(),
-                userDto.getPassword(),
-                roles);
-
-        User createdUser = userService.createUser(userDto.getUsername(), userDto.getFirstName(), userDto.getLastName(),
-                userDto.getEmail(), userDto.getPassword(), roles);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        User existingUser = userService.getUser(id);
-        if (existingUser == null) {
+        try {
+            User updatedUser = userService.updateUser(id, userDto);
+            return ResponseEntity.ok(updatedUser);
+        } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
-
-
-        Set<Role> roles = roleService.findRoleByIds(userDto.getRoleIds());
-        if (roles.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-
-        String password = userDto.getPassword();
-        if (password == null || password.isEmpty()) {
-            password = existingUser.getPassword();
-        }
-
-
-        User updatedUser = userService.updateUser(id,
-                userDto.getUsername(),
-                userDto.getFirstName(),
-                userDto.getLastName(),
-                userDto.getEmail(),
-                password,
-                roles);
-
-        return ResponseEntity.ok(updatedUser);
     }
 
-
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        User user = userService.getUser(id);
-        if (user == null) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/api/current-user")
+    @GetMapping("/current-user")
     public ResponseEntity<User> getCurrentUser(UserDetails userDetails) {
         User currentUser = userService.findUserByName(userDetails.getUsername());
         return ResponseEntity.ok(currentUser);
@@ -119,6 +89,6 @@ public class UserRestController {
 
     @GetMapping("/roles")
     public List<Role> getAllRoles() {
-        return roleService.findAllRoles();
+        return roleServiceImpl.findAllRoles();
     }
 }

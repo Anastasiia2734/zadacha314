@@ -3,6 +3,7 @@ package ru.kata.spring.boot_security.demo.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.DTO.UserDto;
 import ru.kata.spring.boot_security.demo.dao.RoleDao;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.entity.Role;
@@ -55,52 +56,74 @@ public class UserServiceImpl implements UserService {
         userDao.delete(id);
     }
 
-
     @Override
     @Transactional
-    public User createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
-
-        if (userDao.findUserByName(name) != null) {
+    public User createUser(UserDto userDto) {
+        if (userDao.findUserByName(userDto.getUsername()) != null) {
             throw new EntityNotFoundException("Логин должен быть уникальным");
         }
 
+
+        Set<Role> roles = findRolesByIds(userDto.getRoleIds());
+        if (roles.isEmpty()) {
+            throw new EntityNotFoundException("Roles not found");
+        }
+
+
         User user = new User();
-        user.setUsername(name);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        String hashedPassword = passwordEncoder.encode(password);
-        user.setPassword(hashedPassword);
+        user.setUsername(userDto.getUsername());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRoles(roles);
 
         userDao.create(user);
         return user;
     }
 
-
     @Override
     @Transactional
-    public User updateUser(Long id, String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
+    public User updateUser(Long id, UserDto userDto) {
         User user = getUser(id);
 
-        if (user != null) {
-            if (name != null && !name.equals(user.getUsername()) && userDao.findUserByName(name) != null) {
-                throw new EntityNotFoundException("Логин должен быть уникальным");
-            }
-
-            user.setUsername(name);
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            user.setEmail(email);
-
-            if (password != null && !password.isEmpty()) {
-                user.setPassword(passwordEncoder.encode(password));
-            }
-
-            user.setRoles(roles);
-            userDao.update(user);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found");
         }
 
+
+        if (userDto.getUsername() != null && !userDto.getUsername().equals(user.getUsername())
+                && userDao.findUserByName(userDto.getUsername()) != null) {
+            throw new EntityNotFoundException("Логин должен быть уникальным");
+        }
+
+
+        user.setUsername(userDto.getUsername());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
+
+        Set<Role> roles = findRolesByIds(userDto.getRoleIds());
+        user.setRoles(roles);
+
+        userDao.update(user);
         return user;
+    }
+
+    private Set<Role> findRolesByIds(List<Long> roleIds) {
+        Set<Role> roles = roleDao.findRolesByIds(roleIds);
+        if (roles == null || roles.isEmpty()) {
+            throw new EntityNotFoundException("Roles not found");
+        }
+        return roles;
+    }
+
+    public List<Role> getAllRoles() {
+        return roleDao.getAllRoles();
     }
 }

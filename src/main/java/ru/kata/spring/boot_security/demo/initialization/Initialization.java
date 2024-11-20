@@ -37,23 +37,5 @@ public class Initialization {
             userRole.setName("ROLE_USER");
             roleDao.saveRole(userRole);
         }
-
-
-        if (userService.findUserByName("admin") == null) {
-            Set<Role> adminRole = new HashSet<>();
-            Role userRole = roleDao.findRoleByName("ROLE_USER");
-            Role adminRoles = roleDao.findRoleByName("ROLE_ADMIN");
-           adminRole.add(userRole);
-            adminRole.add(adminRoles);
-            userService.createUser("admin", "Евгений", "Кузнецов", "kuzya92admin.@mail.ru", "admin", adminRole);
-        }
-
-
-        if (userService.findUserByName("user") == null) {
-            Set<Role> userRoles = new HashSet<>();
-            Role userRole = roleDao.findRoleByName("ROLE_USER");
-            userRoles.add(userRole);
-            userService.createUser("user", "Илья", "Набоков", "i.nabokovuser@mail.ru", "user", userRoles);
-        }
     }
 }
