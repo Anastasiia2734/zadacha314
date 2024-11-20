@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,7 +53,7 @@ public class UserRestController {
     public ResponseEntity<User> createUser(@RequestBody UserDto userDto) {
         Set<Role> roles = roleService.findRoleByIds(userDto.getRoleIds());
         if (roles.isEmpty()) {
-            return ResponseEntity.badRequest().build();  // Handle the case where no valid roles were found
+            return ResponseEntity.badRequest().build();
         }
 
         User user = new User(userDto.getUsername(),
@@ -75,21 +76,30 @@ public class UserRestController {
             return ResponseEntity.notFound().build();
         }
 
+
         Set<Role> roles = roleService.findRoleByIds(userDto.getRoleIds());
         if (roles.isEmpty()) {
-            return ResponseEntity.badRequest().build();  // Handle the case where no valid roles were found
+            return ResponseEntity.badRequest().build();
         }
+
+
+        String password = userDto.getPassword();
+        if (password == null || password.isEmpty()) {
+            password = existingUser.getPassword();
+        }
+
 
         User updatedUser = userService.updateUser(id,
                 userDto.getUsername(),
                 userDto.getFirstName(),
                 userDto.getLastName(),
                 userDto.getEmail(),
-                userDto.getPassword(),
+                password,
                 roles);
 
         return ResponseEntity.ok(updatedUser);
     }
+
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -99,6 +109,12 @@ public class UserRestController {
         }
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/current-user")
+    public ResponseEntity<User> getCurrentUser(UserDetails userDetails) {
+        User currentUser = userService.findUserByName(userDetails.getUsername());
+        return ResponseEntity.ok(currentUser);
     }
 
     @GetMapping("/roles")

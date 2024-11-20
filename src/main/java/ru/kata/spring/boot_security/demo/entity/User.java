@@ -4,6 +4,7 @@ import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,6 +29,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Поле username не может быть пустым")
     @Size(min = 1, max = 20, message = "username должен содержать от 1 до 20 символов")
+    @Column(unique = true)
     private String username;
 
     @NotBlank(message = "Поле e-mail не может быть пустым")

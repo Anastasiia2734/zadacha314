@@ -15,13 +15,12 @@ import java.util.Set;
 public class Initialization {
     private final UserService userService;
     private final RoleDao roleDao;
-    private final RoleServiceImpl roleServiceImpl;
+
 
     @Autowired
-    public Initialization(UserService userService, RoleDao roleDao, RoleServiceImpl roleServiceImpl) {
+    public Initialization(UserService userService, RoleDao roleDao) {
         this.userService = userService;
         this.roleDao = roleDao;
-        this.roleServiceImpl = roleServiceImpl;
     }
 
     @PostConstruct
@@ -40,7 +39,7 @@ public class Initialization {
         }
 
 
-        /*if (userService.findUserByName("admin") == null) {
+        if (userService.findUserByName("admin") == null) {
             Set<Role> adminRole = new HashSet<>();
             Role userRole = roleDao.findRoleByName("ROLE_USER");
             Role adminRoles = roleDao.findRoleByName("ROLE_ADMIN");
@@ -55,6 +54,6 @@ public class Initialization {
             Role userRole = roleDao.findRoleByName("ROLE_USER");
             userRoles.add(userRole);
             userService.createUser("user", "Илья", "Набоков", "i.nabokovuser@mail.ru", "user", userRoles);
-        }*/
+        }
     }
 }

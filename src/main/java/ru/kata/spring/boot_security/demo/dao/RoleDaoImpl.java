@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entity.Role;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -37,15 +36,17 @@ public class RoleDaoImpl implements RoleDao {
 
     @Override
     public Set<Role> findRolesByIds(List<Long> roleIds) {
-        TypedQuery<Role> query = entityManager.createQuery("SELECT r FROM Role r WHERE r.id IN :roleIds", Role.class);
-        query.setParameter("roleIds", roleIds);
-        return new HashSet<>(query.getResultList());
+        List<Role> query = entityManager.createQuery("SELECT r FROM Role r WHERE r.id IN :roleIds", Role.class)
+                        .setParameter("roleIds", roleIds)
+        .setParameter("roleIds", roleIds)
+                .getResultList();
+        return new HashSet<>(query);
     }
 
     @Override
     @Transactional
     public void saveRole(Role role) {
-        entityManager.persist(role);
+        entityManager.merge(role);
     }
 
     @Override

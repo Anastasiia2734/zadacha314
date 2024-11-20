@@ -21,6 +21,7 @@ public class UserDto {
 
     @NotBlank
     private List<Long> roleIds;
+
     public List<Long> getRoleIds() {
         return roleIds;
     }

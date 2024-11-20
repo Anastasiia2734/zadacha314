@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.service;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public User findUserByName(String username) {
@@ -61,33 +59,44 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
+
+        if (userDao.findUserByName(name) != null) {
+            throw new EntityNotFoundException("Поле username должно бфть уникально");
+        }
+
         User user = new User();
         user.setUsername(name);
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(password);
+        String hashedPassword = passwordEncoder.encode(password);
         user.setPassword(hashedPassword);
-
         user.setRoles(roles);
+
         userDao.create(user);
         return user;
     }
+
 
     @Override
     @Transactional
     public User updateUser(Long id, String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
         User user = getUser(id);
+
         if (user != null) {
+            if (name != null && !name.equals(user.getUsername()) && userDao.findUserByName(name) != null) {
+                throw new EntityNotFoundException("Поле username должно быть");
+            }
+
             user.setUsername(name);
-            //user.setFirstName(firstName);
+            user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setEmail(email);
 
             if (password != null && !password.isEmpty()) {
                 user.setPassword(passwordEncoder.encode(password));
             }
+
             user.setRoles(roles);
             userDao.update(user);
         }

@@ -1,176 +1,460 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        input[type="radio"] {
-            display: none;
+        body {
+            background-color: #f8f9fa;
         }
-
-        .tab-content > div {
-            display: none;
-        }
-
-        #tab1:checked ~ .tab-content #userList,
-        #tab2:checked ~ .tab-content #addUser {
-            display: block;
-        }
-
-        .modal {
-            display: none;
+        .sidebar {
+            width: 250px;
             position: fixed;
-            z-index: 1050;
-            left: 0;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+            left: 0;
+            bottom: 0;
+            background-color: #ffffff;
+            padding-top: 145px;
+        }
+        .sidebar .nav-link {
+            color: #fff !important;
+        }
+        .sidebar .nav-link.active {
+            background-color: #007bff !important;
+        }
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+        }
+        .navbar {
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+        }
+        .container-fluid {
+            padding: 0;
+        }
+        .form-group label {
+            font-weight: 600;
+        }
+        .modal-header, .modal-footer {
+            background-color: #f1f1f1;
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+        .table th, .table td {
+            vertical-align: middle;
         }
 
-        .modal-content {
-            margin: 10% auto;
-            padding: 20px;
-            width: 80%;
+        .user-info {
+            color: #010202; /* Change this to any color you want */
         }
 
-        .modal:target {
-            display: block;
+        .btn-outline-light {
+            color: #010202;
         }
     </style>
 </head>
+
 <body>
 <div class="container-fluid">
-    <div class="container mt-3">
-        <div class="row">
-            <!-- Left navigation -->
-            <div class="col-md-3">
-                <h2>Navigation</h2>
-                <ul class="list-group">
-                    <li class="list-group-item" th:each="role : ${currentUser.authorities}"
-                        th:if="${role.authority == 'ROLE_ADMIN'}">
-                        <a href="/admin">Admin Page</a>
-                    </li>
-                    <li class="list-group-item" th:each="role : ${currentUser.authorities}"
-                        th:if="${role.authority == 'ROLE_ADMIN'}">
-                        <a href="/user">User Page</a>
-                    </li>
-                </ul>
+    <!-- Верхняя панель -->
+    <nav class="navbar navbar-expand-lg navbar-white bg-white mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Admin Panel</a>
+            <div class="d-flex align-items-center">
+                <!-- Информация о текущем пользователе -->
+                <div class="me-3 text-light">
+                    <span class="user-info">Пользователь: </span>
+                    <strong class="user-info" th:text="${currentUser.email}"></strong>
+                    <span class="user-info"> с правами доступа: </span>
+                    <strong class="user-info" th:text="${currentUser.username}"></strong>
+                </div>
+                <!-- Кнопка Logout -->
+                <button class="btn btn-outline-light" onclick="logout()">Выход</button>
             </div>
+        </div>
+    </nav>
 
-            <div class="col-md-9">
-                <div id="admin" class="content-section">
-                    <h2>All Users</h2>
 
-                    <ul class="nav nav-pills">
+
+
+
+
+
+    <div class="container-fluid">
+        <!-- Sidebar with Tabs -->
+        <div class="sidebar">
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link active" id="v-pills-admin-tab" data-toggle="pill" href="#v-pills-admin" role="tab" aria-controls="v-pills-admin" aria-selected="true">Admin Page</a>
+                <li class="list-group-item" th:each="role : ${currentUser.authorities}"
+                    th:if="${role.authority == 'ROLE_ADMIN'}">
+                    <a href="http://localhost:8080/user">User Page</a>
+                </li>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content container mt-5">
+            <div class="tab-content" id="v-pills-tabContent">
+                <!-- Admin Page Content -->
+                <div class="tab-pane fade show active" id="v-pills-admin" role="tabpanel" aria-labelledby="v-pills-admin-tab">
+
+
+                    <!-- Admin Page Tabs (All Users and Create User) -->
+                    <ul class="nav nav-pills mb-3" id="admin-tabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#usersTable" onclick="showSection('usersTable')">Users table</a>
+                            <a class="nav-link active" id="all-users-tab" data-toggle="pill" href="#all-users" role="tab" aria-controls="all-users" aria-selected="true">Все пользователи</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#newUser" onclick="showSection('newUser')">New User</a>
+                            <a class="nav-link" id="create-user-tab" data-toggle="pill" href="#create-user" role="tab" aria-controls="create-user" aria-selected="false">Создать нового пользователя</a>
                         </li>
                     </ul>
 
-                    <div class="tab-content mt-3">
-                        <div id="usersTable" class="tab-pane fade show active">
-                            <h3>Users Table</h3>
-                            <table class="table table-responsive">
+                    <!-- Tab Content for Admin -->
+                    <div class="tab-content" id="admin-tab-content">
+                        <!-- All Users Tab -->
+                        <div class="tab-pane fade show active" id="all-users" role="tabpanel" aria-labelledby="all-users-tab">
+                            <h3>Список пользователей</h3>
+                            <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Username</th>
-                                    <th>Roles</th>
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
-                                    <th>Password</th>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
+                                    <th>Roles</th>
+                                    <th>Actions</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                <tr th:each="user : ${users}">
-                                    <td th:text="${user.id}"></td>
-                                    <td th:text="${user.username}"></td>
-                                    <td th:text="${user.roles}"></td>
-                                    <td th:text="${user.firstName}"></td>
-                                    <td th:text="${user.lastName}"></td>
-                                    <td th:text="${user.email}"></td>
-                                    <td th:text="${user.password}"></td>
-                                    <td>
-                                        <a th:href="@{/admin/edit(id=${user.id})}" class="btn btn-info">Edit</a>
-                                    </td>
-                                    <td>
-                                        <form th:action="@{/admin/delete(id=${user.id})}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
+                                <tbody id="userTableBody">
+                                <!-- Users data will be loaded here by JavaScript -->
                                 </tbody>
                             </table>
                         </div>
 
-                        <div id="newUser" class="tab-pane fade">
-                            <h3 class="mt-3">Create New User</h3>
-                            <form method="post" action="/admin/new">
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Username</label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
+                        <!-- Create New User Tab -->
+                        <div class="tab-pane fade" id="create-user" role="tabpanel" aria-labelledby="create-user-tab">
+                            <h1 class="text-center">Создать нового пользователя</h1>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Форма для создания пользователя</h4>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="firstName" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="lastName" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
+                                <div class="card-body">
+                                    <form id="userForm">
+                                        <input type="hidden" id="userId">
 
-                                <div class="mb-3">
-                                    <label for="roleIds" class="form-label">Roles</label>
-                                    <select class="form-select" id="roleIds" name="roleIds" multiple required>
-                                        <option th:each="role : ${roles}"
-                                                th:value="${role.id}"
-                                                th:text="${role.name}"></option>
-                                    </select>
+                                        <div class="form-group">
+                                            <label for="username">Username</label>
+                                            <input type="text" id="username" class="form-control" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="firstName">First Name</label>
+                                            <input type="text" id="firstName" class="form-control" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="lastName">Last Name</label>
+                                            <input type="text" id="lastName" class="form-control" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="email">Email</label>
+                                            <input type="email" id="email" class="form-control" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="password">Password</label>
+                                            <input type="password" id="password" class="form-control" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="roleIds">Roles</label>
+                                            <label for="roleIds">1 - Admin</label>
+                                            <label for="roleIds">2 - User</label>
+                                            <input type="text" id="roleIds" class="form-control" required>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                                    </form>
                                 </div>
-                                <button type="submit" class="btn btn-success">Create User</button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- User Page Content -->
+                <div class="tab-pane fade" id="v-pills-user" role="tabpanel" aria-labelledby="v-pills-user-tab">
+                    <h2>Welcome to User Page</h2>
+                    <p>Here you can manage your user profile or view other details specific to your account.</p>
+                    <!-- Add content for user-specific page here -->
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    function showSection(sectionId) {
-        document.querySelectorAll('.tab-pane').forEach(section => {
-            section.classList.remove('show', 'active');
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Удаление пользователя</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить этого пользователя?</p>
+                    <p><strong>Логин:</strong> <span id="deleteUserName"></span></p>
+                    <p><strong>Имя пользователя:</strong> <span id="deleteFirstName"></span></p>
+                    <p><strong>Фамилия пользователя:</strong> <span id="deleteLastName"></span></p>
+                    <p><strong>Email:</strong> <span id="deleteUserEmail"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Editing User -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Редактировать пользователя</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+
+                        <div class="form-group">
+                            <label for="editUsername">Username</label>
+                            <input type="text" id="editUsername" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editFirstName">First Name</label>
+                            <input type="text" id="editFirstName" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editLastName">Last Name</label>
+                            <input type="text" id="editLastName" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEmail">Email</label>
+                            <input type="email" id="editEmail" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editPassword">Password</label>
+                            <input type="password" id="editPassword" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editRoleIds">Roles:</label>
+                            <label for="editRoleIds">1 - Admin</label>
+                            <label for="editRoleIds">2 - User</label>
+                            <input type="text" id="editRoleIds" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveEditBtn">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to load users
+        function loadUsers() {
+            $.get('/api/users', function(users) {
+                let rows = '';
+                users.forEach(user => {
+                    rows += `
+    <tr>
+        <td>${user.id}</td>
+        <td>${user.username}</td>
+        <td>${user.firstName}</td>
+        <td>${user.lastName}</td>
+        <td>${user.email}</td>
+        <td>${user.roles.map(role => role.name).join(', ')}</td>
+        <td>
+            <button class="btn btn-warning" onclick="editUser(${user.id})">Изменить</button>
+                                <button class="btn btn-danger" onclick="showDeleteModal(${user.id})">Удалить</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#userTableBody').html(rows);
+            });
+        }
+
+        // Function to create or update a user
+        $('#userForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const userId = $('#userId').val();
+            const username = $('#username').val();
+            const firstName = $('#firstName').val();
+            const lastName = $('#lastName').val();
+            const email = $('#email').val();
+            const password = $('#password').val();
+            const roleIds = $('#roleIds').val().split(',').map(id => id.trim());
+
+            const userData = {
+                username,
+                firstName,
+                lastName,
+                email,
+                password,
+                roleIds
+            };
+
+            const url = userId ? `/api/users/${userId}` : '/api/users';
+            const method = userId ? 'PUT' : 'POST';
+
+            $.ajax({
+                url,
+                method,
+                contentType: 'application/json',
+                data: JSON.stringify(userData),
+                success: function() {
+                    alert('Пользователь сохранен!');
+                    loadUsers();
+                    resetForm();
+                },
+                error: function() {
+                    alert('Ошибка при сохранении пользователя');
+                }
+            });
         });
 
-        document.getElementById(sectionId).classList.add('show', 'active');
+        // Function to edit a user
+        function editUser(id) {
+            $.get(`/api/users/${id}`, function(user) {
+                // Fill modal fields with user data
+                $('#editUserId').val(user.id);
+                $('#editUsername').val(user.username);
+                $('#editFirstName').val(user.firstName);
+                $('#editLastName').val(user.lastName);
+                $('#editEmail').val(user.email);
+                $('#editPassword').val(''); // Do not pre-fill password for security reasons
+                $('#editRoleIds').val(user.roles.map(role => role.id).join(', '));
 
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
+                // Open the modal
+                $('#editModal').modal('show');
+            });
+        }
+
+        // Save edited user
+        $('#saveEditBtn').on('click', function() {
+            const id = $('#editUserId').val();
+            const username = $('#editUsername').val();
+            const firstName = $('#editFirstName').val();
+            const lastName = $('#editLastName').val();
+            const email = $('#editEmail').val();
+            const password = $('#editPassword').val();
+            const roleIds = $('#editRoleIds').val().split(',').map(id => id.trim());
+
+            const updatedUser = {
+                username,
+                firstName,
+                lastName,
+                email,
+                password,
+                roleIds
+            };
+
+            $.ajax({
+                url: `/api/users/${id}`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedUser),
+                success: function() {
+                    alert('Пользователь успешно обновлён!');
+                    $('#editModal').modal('hide');
+                    loadUsers();
+                },
+                error: function() {
+                    alert('Ошибка при обновлении пользователя.');
+                }
+            });
         });
-        document.querySelector(`[href="#${sectionId}"]`).classList.add('active');
-    }
 
-    document.getElementById('usersTable').classList.add('show', 'active');
-</script>
+
+
+        function showDeleteModal(userId) {
+            $.get(`/api/users/${userId}`, function(user) {
+                $('#deleteUserName').text(user.username);
+                $('#deleteFirstName').text(user.firstName);
+                $('#deleteLastName').text(user.lastName);
+                $('#deleteUserEmail').text(user.email);
+
+                // Attach the user ID to the confirm delete button
+                $('#confirmDeleteBtn').data('userId', userId);
+
+                // Show the modal
+                $('#deleteModal').modal('show');
+            });
+        }
+
+        // Function to confirm delete
+        $('#confirmDeleteBtn').on('click', function() {
+            const userId = $(this).data('userId');
+
+            $.ajax({
+                url: `/api/users/${userId}`,
+                method: 'DELETE',
+                success: function() {
+                    alert('Пользователь успешно удален!');
+                    $('#deleteModal').modal('hide');
+                    loadUsers();
+                },
+                error: function() {
+                    alert('Ошибка при удалении пользователя.');
+                }
+            });
+        });
+
+        // Function to reset the form
+        function resetForm() {
+            $('#userForm')[0].reset();
+            $('#userId').val('');
+            $('#formTitle').text('Создать пользователя');
+        }
+
+        // Load the list of users when the page loads
+        $(document).ready(function() {
+            loadUsers();
+        });
+
+
+
+        // Logout function
+        function logout() {
+            window.location.href = '/logout'; // URL for logout should be configured in Spring Security
+        }
+    </script>
 </body>
 </html>
