@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     public User createUser(String name, String firstName, String lastName, String email, String password, Set<Role> roles) {
 
         if (userDao.findUserByName(name) != null) {
-            throw new EntityNotFoundException("Поле username должно бфть уникально");
+            throw new EntityNotFoundException("Логин должен быть уникально");
         }
 
         User user = new User();
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
         if (user != null) {
             if (name != null && !name.equals(user.getUsername()) && userDao.findUserByName(name) != null) {
-                throw new EntityNotFoundException("Поле username должно быть");
+                throw new EntityNotFoundException("Логин должен быть уникальным");
             }
 
             user.setUsername(name);
